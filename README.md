@@ -62,8 +62,12 @@ Cuando se implemente el login, el código se organizará **por funcionalidad**
 ## Estado actual
 
 Andamiaje: la app arranca y comprueba la conexión con la API contra
-`/api/v1/status`. **Sin lógica de negocio todavía.** El login está especificado
-en `specs/login.md` del repo de specs, pendiente de implementar.
+`/api/v1/status`. **Sin lógica de negocio todavía.**
+
+Las dos funcionalidades especificadas en el repo de specs siguen sin
+implementar: `specs/registro.md` (alta de cuentas y verificación de email) y
+`specs/login.md` (autenticación y sesiones). El registro va primero, porque el
+login asume cuentas que ya existen.
 
 ## Convenciones
 

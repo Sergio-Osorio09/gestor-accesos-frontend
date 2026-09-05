@@ -12,7 +12,8 @@ const SPECS = [
   { file: 'stack.md', description: 'Tecnologías y justificación' },
   { file: 'api-contract.md', description: 'Convenciones y endpoints' },
   { file: 'arquitectura.md', description: 'Diagramas de componentes y flujo' },
-  { file: 'login.md', description: 'Primera funcionalidad especificada' },
+  { file: 'registro.md', description: 'Alta de cuentas y verificación de email' },
+  { file: 'login.md', description: 'Autenticación, renovación y cierre de sesión' },
 ]
 
 export default function App() {
@@ -71,9 +72,9 @@ export default function App() {
       <section className="card">
         <h2>Siguiente paso</h2>
         <p>
-          Implementar <code>specs/login.md</code>: cuatro endpoints bajo{' '}
-          <code>/api/v1/auth</code>, con access token de 15 minutos y refresh token
-          rotatorio en cookie <code>httpOnly</code>.
+          Implementar <code>specs/registro.md</code>: alta de cuentas y verificación
+          de email. Va antes que el login, porque <code>login.md</code> asume cuentas
+          que ya existen.
         </p>
       </section>
     </main>
