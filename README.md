@@ -16,6 +16,13 @@ marketplace.
 
 React 19 · TypeScript · Vite 8 · Yarn 4 (vía corepack)
 
+| Pieza | Elección |
+| --- | --- |
+| Rutas | `react-router-dom` v7 |
+| Formularios | `react-hook-form` + `zod` |
+| HTTP | Cliente `fetch` propio (`src/shared/api/`) |
+| Tests | Vitest + React Testing Library + MSW |
+
 ## Requisitos
 
 Node.js ≥ 20. Yarn no se instala aparte:
@@ -46,28 +53,63 @@ la página mostrará la API como no disponible.
 | `yarn build` | Comprueba tipos (`tsc -b`) y compila a `dist/` |
 | `yarn preview` | Sirve el resultado de `build` |
 | `yarn lint` | Linter (oxlint) |
+| `yarn test` | Ejecuta los tests una vez |
+| `yarn test:watch` | Tests en modo vigilancia |
+
+## Rutas
+
+| Ruta | Página | Spec |
+| --- | --- | --- |
+| `/` | Estado de la conexión con la API | — |
+| `/register` | Formulario de alta | `registro.md` escenarios 1-7 |
+| `/check-your-email` | Pantalla de espera tras el `202`, con reenvío | `registro.md` escenario 11 |
+| `/verify-email?token=…` | Consume el token del enlace del correo | `registro.md` escenarios 8-10 |
+
+`/login` todavía no existe: llega con `specs/login.md`. Los enlaces que apuntan
+a ella caen de momento en la página de "no existe".
 
 ## Estructura
 
+El código se organiza **por funcionalidad**, no por capa técnica:
+
 ```
 src/
-├── api/          # Clientes HTTP, uno por área del contrato
-├── App.tsx       # Página de estado del andamiaje
-└── main.tsx
+├── api/                        # Clientes HTTP del andamiaje
+├── features/auth/
+│   ├── api/authApi.ts          # register, verifyEmail, resendVerification
+│   ├── components/             # RegisterForm, PasswordField, ResendVerification
+│   ├── pages/                  # RegisterPage, CheckYourEmailPage, VerifyEmailPage
+│   └── schemas/                # Reglas zod, compartidas con los tests
+├── shared/api/                 # httpClient, ApiError (RFC 7807), mensajes por code
+├── pages/StatusPage.tsx
+├── test/                       # Arnés de MSW y utilidades de render
+└── App.tsx                     # Rutas
 ```
 
-Cuando se implemente el login, el código se organizará **por funcionalidad**
-(`src/features/auth/…`), no por capa técnica.
+## Decisiones que conviene no deshacer
+
+- **El access token vivirá solo en memoria**, nunca en `localStorage` ni en
+  `sessionStorage`. Lo mismo vale para el token de verificación: se lee del
+  query string, se envía y se olvida.
+- **La interfaz enruta por el `code` del error, nunca por su `detail`.** Los
+  mensajes en español están en un único mapa (`shared/api/errorMessages.ts`);
+  el texto que manda el servidor no se muestra tal cual.
+- **`CheckYourEmailPage` no puede afirmar que la cuenta se haya creado.** El
+  registro responde `202` exista o no el email, a propósito, y decirlo
+  delataría justo lo que la respuesta se calla. Hay un test que lo vigila.
+- **El medidor de fuerza de la contraseña es orientativo.** La lista de
+  contraseñas comunes vive en el backend y no se duplica aquí: añadiría 100 KB
+  de descarga a cada visita.
 
 ## Estado actual
 
-Andamiaje: la app arranca y comprueba la conexión con la API contra
-`/api/v1/status`. **Sin lógica de negocio todavía.**
+- ✅ Registro y verificación de email (`specs/registro.md`), contra la API que
+  fija `specs/api-contract.md` §2.6-2.8.
+- ⬜ Login, sesiones y rutas protegidas (`specs/login.md`).
 
-Las dos funcionalidades especificadas en el repo de specs siguen sin
-implementar: `specs/registro.md` (alta de cuentas y verificación de email) y
-`specs/login.md` (autenticación y sesiones). El registro va primero, porque el
-login asume cuentas que ya existen.
+Los tests corren contra MSW, así que **no hace falta el backend** para
+ejecutarlos. Para probar el flujo a mano sí: la API todavía no expone
+`/api/v1/auth/*`.
 
 ## Convenciones
 
